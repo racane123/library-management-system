@@ -3,20 +3,18 @@ import { libraryAPI } from '../services/api'
 import { 
   BookOpen, 
   Users, 
-  TrendingUp, 
-  Plus, 
-  Search,
-  Edit,
-  Trash2,
-  Eye,
+  TrendingUp,
+  Calendar,
   AlertTriangle,
-  CheckCircle,
-  Calendar
+  CheckCircle
 } from 'lucide-react'
 import LoadingSpinner from './LoadingSpinner'
 import { useNotification } from '../contexts/NotificationContext'
 import { useAuth } from '../contexts/AuthContext'
-import { Modal } from './Modal'
+import BookManagement from './BookManagement'
+import UserManagement from './UserManagement'
+import ReservationManagement from './ReservationManagement'
+import Circulation from './Circulation';
 
 const AdminPanel = () => {
   const [stats, setStats] = useState(null)
@@ -25,47 +23,13 @@ const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('overview')
   const { showError } = useNotification()
   const { user } = useAuth();
-  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
-  const [addUserLoading, setAddUserLoading] = useState(false);
-  const [addUserError, setAddUserError] = useState(null);
-  const [addUserSuccess, setAddUserSuccess] = useState(null);
-  const [newUser, setNewUser] = useState({
-    username: '',
-    name: '',
-    email: '',
-    password: '',
-    role: 'student',
-  });
-  const [users, setUsers] = useState([]);
-  const [usersLoading, setUsersLoading] = useState(false);
-  const [usersError, setUsersError] = useState(null);
-  const [editUser, setEditUser] = useState(null);
-  const [editUserLoading, setEditUserLoading] = useState(false);
-  const [editUserError, setEditUserError] = useState(null);
-  const [editUserSuccess, setEditUserSuccess] = useState(null);
-
-  // Fetch users (admin only)
-  const fetchUsers = async () => {
-    setUsersLoading(true);
-    setUsersError(null);
-    try {
-      const res = await libraryAPI.getUsers();
-      setUsers(res.data || []);
-    } catch (err) {
-      setUsersError(err.message || 'Failed to fetch users');
-    } finally {
-      setUsersLoading(false);
-    }
-  };
 
   useEffect(() => {
-    fetchAdminData()
-    if (activeTab === 'users' && user?.role === 'admin') {
-      fetchUsers();
-    }
-  }, [activeTab, user]);
+    fetchAdminData();
+  }, [activeTab]);
 
   const fetchAdminData = async () => {
+    if (activeTab !== 'overview' && activeTab !== 'borrowings') return;
     try {
       setLoading(true)
       const [statsData, borrowingsData] = await Promise.all([
@@ -114,59 +78,6 @@ const AdminPanel = () => {
       bgColor: 'bg-blue-100'
     }
   }
-
-  const handleAddUser = async (e) => {
-    e.preventDefault();
-    setAddUserLoading(true);
-    setAddUserError(null);
-    setAddUserSuccess(null);
-    try {
-      await libraryAPI.createUser(newUser);
-      setAddUserSuccess('User created successfully!');
-      setNewUser({ username: '', name: '', email: '', password: '', role: 'student' });
-    } catch (err) {
-      setAddUserError(err.message || 'Failed to create user');
-    } finally {
-      setAddUserLoading(false);
-    }
-  };
-
-  // Edit user handlers
-  const handleEditUser = (user) => {
-    setEditUser(user);
-    setEditUserError(null);
-    setEditUserSuccess(null);
-  };
-  const handleEditUserChange = (e) => {
-    setEditUser({ ...editUser, [e.target.name]: e.target.value });
-  };
-  const handleEditUserSubmit = async (e) => {
-    e.preventDefault();
-    setEditUserLoading(true);
-    setEditUserError(null);
-    setEditUserSuccess(null);
-    try {
-      await libraryAPI.updateUser(editUser.id, editUser);
-      setEditUserSuccess('User updated successfully!');
-      fetchUsers();
-      setTimeout(() => setEditUser(null), 1000);
-    } catch (err) {
-      setEditUserError(err.message || 'Failed to update user');
-    } finally {
-      setEditUserLoading(false);
-    }
-  };
-  // Delete user
-  const handleDeleteUser = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
-    try {
-      await libraryAPI.deleteUser(id);
-      fetchUsers();
-      showError('User deleted successfully!');
-    } catch (err) {
-      showError(err.message || 'Failed to delete user');
-    }
-  };
 
   if (loading) {
     return <LoadingSpinner text="Loading admin panel..." />
@@ -233,55 +144,22 @@ const AdminPanel = () => {
 
       {/* Tabs */}
       <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'overview'
-                ? 'border-library-blue text-library-blue'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveTab('borrowings')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'borrowings'
-                ? 'border-library-blue text-library-blue'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Recent Borrowings
-          </button>
-          <button
-            onClick={() => setActiveTab('management')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'management'
-                ? 'border-library-blue text-library-blue'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Book Management
-          </button>
+        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+          <button onClick={() => setActiveTab('overview')} className={`shrink-0 border-b-2 py-4 px-1 text-sm font-medium ${activeTab === 'overview' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>Overview</button>
+          <button onClick={() => setActiveTab('borrowings')} className={`shrink-0 border-b-2 py-4 px-1 text-sm font-medium ${activeTab === 'borrowings' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>Recent Borrowings</button>
+          <button onClick={() => setActiveTab('management')} className={`shrink-0 border-b-2 py-4 px-1 text-sm font-medium ${activeTab === 'management' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>Book Management</button>
+          <button onClick={() => setActiveTab('reservations')} className={`shrink-0 border-b-2 py-4 px-1 text-sm font-medium ${activeTab === 'reservations' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>Reservations</button>
+          <button onClick={() => setActiveTab('circulation')} className={`shrink-0 border-b-2 py-4 px-1 text-sm font-medium ${activeTab === 'circulation' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>Circulation</button>
           {user?.role === 'admin' && (
-            <button
-              onClick={() => setActiveTab('users')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'users'
-                  ? 'border-library-blue text-library-blue'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              User Management
-            </button>
+            <button onClick={() => setActiveTab('users')} className={`shrink-0 border-b-2 py-4 px-1 text-sm font-medium ${activeTab === 'users' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>User Management</button>
           )}
         </nav>
       </div>
 
       {/* Tab Content */}
       {activeTab === 'overview' && (
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {/* Recent Borrowings card */}
           <div className="card">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Library Overview</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -330,50 +208,13 @@ const AdminPanel = () => {
               </div>
             </div>
           </div>
-          {user?.role === 'admin' && (
-            <button className="btn-primary mt-4" onClick={() => setIsAddUserOpen(true)}>
-              + Add User
-            </button>
-          )}
-          <Modal open={isAddUserOpen} onClose={() => setIsAddUserOpen(false)} title="Add New User">
-            <form className="space-y-4" onSubmit={handleAddUser}>
-              {addUserError && <div className="text-red-600">{addUserError}</div>}
-              {addUserSuccess && <div className="text-green-600">{addUserSuccess}</div>}
-              <div>
-                <label className="block text-sm font-medium">Username</label>
-                <input type="text" className="input-field" required value={newUser.username} onChange={e => setNewUser({ ...newUser, username: e.target.value })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium">Name</label>
-                <input type="text" className="input-field" required value={newUser.name} onChange={e => setNewUser({ ...newUser, name: e.target.value })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium">Email</label>
-                <input type="email" className="input-field" required value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium">Password</label>
-                <input type="password" className="input-field" required value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium">Role</label>
-                <select className="input-field" value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })}>
-                  <option value="student">Student</option>
-                  <option value="librarian">Librarian</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              <button type="submit" className="btn-primary w-full" disabled={addUserLoading}>
-                {addUserLoading ? 'Creating...' : 'Create User'}
-              </button>
-            </form>
-          </Modal>
         </div>
       )}
 
       {activeTab === 'borrowings' && (
         <div className="card">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Borrowings</h3>
+          {/* Recent Borrowings Table */}
+          <h3 className="text-lg font-medium text-gray-900 mb-4">All Recent Borrowings</h3>
           
           {recentBorrowings.length > 0 ? (
             <div className="overflow-x-auto">
@@ -442,119 +283,10 @@ const AdminPanel = () => {
         </div>
       )}
 
-      {activeTab === 'management' && (
-        <div className="space-y-6">
-          <div className="card">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900">Book Management</h3>
-              <button className="btn-primary flex items-center">
-                <Plus className="h-4 w-4 mr-2" />
-                Add New Book
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 border border-gray-200 rounded-lg">
-                <BookOpen className="h-8 w-8 text-library-blue mx-auto mb-2" />
-                <h4 className="font-medium text-gray-900">Add Books</h4>
-                <p className="text-sm text-gray-500">Add new books to the collection</p>
-              </div>
-              
-              <div className="text-center p-4 border border-gray-200 rounded-lg">
-                <Edit className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-                <h4 className="font-medium text-gray-900">Edit Books</h4>
-                <p className="text-sm text-gray-500">Update book information</p>
-              </div>
-              
-              <div className="text-center p-4 border border-gray-200 rounded-lg">
-                <Trash2 className="h-8 w-8 text-red-600 mx-auto mb-2" />
-                <h4 className="font-medium text-gray-900">Remove Books</h4>
-                <p className="text-sm text-gray-500">Remove books from collection</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="card">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button className="btn-secondary flex items-center justify-center">
-                <Search className="h-4 w-4 mr-2" />
-                Search Books
-              </button>
-              <button className="btn-secondary flex items-center justify-center">
-                <Eye className="h-4 w-4 mr-2" />
-                View All Borrowings
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'users' && user?.role === 'admin' && (
-        <div className="card">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">User Management</h3>
-          {usersLoading ? (
-            <LoadingSpinner text="Loading users..." />
-          ) : usersError ? (
-            <div className="text-red-600">{usersError}</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                    <th className="px-6 py-3"></th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map((u) => (
-                    <tr key={u.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">{u.username}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{u.email}</td>
-                      <td className="px-6 py-4 whitespace-nowrap capitalize">{u.role}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{new Date(u.created_at).toLocaleDateString()}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <button className="btn-secondary mr-2" onClick={() => handleEditUser(u)}>Edit</button>
-                        <button className="btn-danger" onClick={() => handleDeleteUser(u.id)}>Delete</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          <Modal open={!!editUser} onClose={() => setEditUser(null)} title="Edit User">
-            {editUser && (
-              <form className="space-y-4" onSubmit={handleEditUserSubmit}>
-                {editUserError && <div className="text-red-600">{editUserError}</div>}
-                {editUserSuccess && <div className="text-green-600">{editUserSuccess}</div>}
-                <div>
-                  <label className="block text-sm font-medium">Username</label>
-                  <input name="username" type="text" className="input-field" required value={editUser.username} onChange={handleEditUserChange} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium">Email</label>
-                  <input name="email" type="email" className="input-field" required value={editUser.email} onChange={handleEditUserChange} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium">Role</label>
-                  <select name="role" className="input-field" value={editUser.role} onChange={handleEditUserChange}>
-                    <option value="student">Student</option>
-                    <option value="librarian">Librarian</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-                <button type="submit" className="btn-primary w-full" disabled={editUserLoading}>
-                  {editUserLoading ? 'Saving...' : 'Save Changes'}
-                </button>
-              </form>
-            )}
-          </Modal>
-        </div>
-      )}
+      {activeTab === 'management' && <BookManagement />}
+      {activeTab === 'reservations' && <ReservationManagement />}
+      {activeTab === 'circulation' && <Circulation />}
+      {activeTab === 'users' && user?.role === 'admin' && <UserManagement />}
     </div>
   )
 }

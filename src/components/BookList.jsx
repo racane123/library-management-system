@@ -180,15 +180,15 @@ const BookList = () => {
                 {/* Book Cover */}
                 <div className="relative mb-4">
                   <img
-                    src={book.cover_image_url || 'https://via.placeholder.com/300x400?text=No+Cover'}
+                    src={book.cover_image_url || 'https://placehold.co/400'}
                     alt={book.title}
                     className="w-full h-48 object-cover rounded-lg"
                     onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/300x400?text=No+Cover'
+                      e.target.src = 'https://placehold.co/400'
                     }}
                   />
                   <div className="absolute top-2 right-2">
-                    {getAvailabilityBadge(book.available_copies)}
+                    {getAvailabilityBadge(parseInt(book.available_copies))}
                   </div>
                 </div>
 

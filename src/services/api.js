@@ -104,20 +104,44 @@ export const libraryAPI = {
     return response.data
   },
 
+  // Admin: Issue a book to a user
+  issueBook: async (userId, bookId) => {
+    const response = await api.post('/library/admin/issue', { userId, bookId });
+    return response.data;
+  },
+
+  // Admin: Search for active borrowings
+  searchBorrowings: async (query) => {
+    const response = await api.get('/library/admin/borrowings/search', { params: { q: query } });
+    return response.data;
+  },
+
+  // Admin: Return a book
+  returnBook: async (borrowingId) => {
+    const response = await api.post('/library/admin/return', { borrowingId });
+    return response.data;
+  },
+
+  // Admin: Renew a book
+  renewBook: async (borrowingId) => {
+    const response = await api.post(`/library/admin/borrowings/${borrowingId}/renew`);
+    return response.data;
+  },
+
   // Add user registration (admin only)
   createUser: async (userData) => {
     try {
       const res = await api.post('/auth/register', userData);
-      return res.data;
+      return res.data;  
     } catch (err) {
       throw new Error(err.response?.data?.message || 'Failed to create user');
     }
   },
 
   // User management (admin only)
-  getUsers: async () => {
+  getUsers: async (params = {}) => {
     try {
-      const res = await api.get('/auth/users');
+      const res = await api.get('/auth/users', { params });
       return res.data;
     } catch (err) {
       throw new Error(err.response?.data?.error || 'Failed to fetch users');
@@ -138,6 +162,34 @@ export const libraryAPI = {
     } catch (err) {
       throw new Error(err.response?.data?.error || 'Failed to delete user');
     }
+  },
+
+  // Get user's borrowing history (admin)
+  getUserBorrowings: async (userId) => {
+    const response = await api.get(`/library/admin/borrowings/${userId}`);
+    return response.data;
+  },
+
+  // Reservation management (admin only)
+  getReservations: async () => {
+    const response = await api.get('/library/admin/reservations');
+    return response.data;
+  },
+
+  fulfillReservation: async (reservationId) => {
+    const response = await api.post(`/library/admin/reservations/${reservationId}/fulfill`);
+    return response.data;
+  },
+
+  // User-facing reservation
+  createReservation: async (bookId) => {
+    const response = await api.post('/library/reservations', { bookId });
+    return response.data;
+  },
+
+  getMyReservations: async () => {
+    const response = await api.get('/library/reservations');
+    return response.data;
   },
 }
 

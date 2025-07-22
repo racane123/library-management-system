@@ -22,6 +22,7 @@ const BookDetail = () => {
   const [book, setBook] = useState(null)
   const [loading, setLoading] = useState(true)
   const [borrowing, setBorrowing] = useState(false)
+  const [reserving, setReserving] = useState(false)
   const [error, setError] = useState(null)
   const { showError, showSuccess } = useNotification()
 
@@ -33,6 +34,8 @@ const BookDetail = () => {
     try {
       setLoading(true)
       const bookData = await libraryAPI.getBook(id)
+
+      console.log(bookData)
       setBook(bookData)
     } catch (error) {
       showError('Book not found')
@@ -57,8 +60,22 @@ const BookDetail = () => {
     }
   }
 
+  const handleReserve = async () => {
+    try {
+      setReserving(true);
+      setError(null);
+      await libraryAPI.createReservation(book.id);
+      showSuccess('Book reserved successfully! You will be notified when it becomes available.');
+    } catch (error) {
+      showError(error.message || 'Failed to reserve book');
+      setError(error.message || 'Failed to reserve book');
+    } finally {
+      setReserving(false);
+    }
+  };
+
   const getAvailabilityStatus = () => {
-    if (book.available_copies > 0) {
+    if (parseInt(book.available_copies || "0") > 0) {
       return {
         status: 'available',
         text: 'Available',
@@ -118,11 +135,11 @@ const BookDetail = () => {
         <div className="lg:col-span-1">
           <div className="card">
             <img
-              src={book.cover_image_url || 'https://via.placeholder.com/400x600?text=No+Cover'}
+              src={book.cover_image_url || 'https://placehold.co/400'}
               alt={book.title}
               className="w-full h-auto rounded-lg"
               onError={(e) => {
-                e.target.src = 'https://via.placeholder.com/400x600?text=No+Cover'
+                e.target.src = 'https://placehold.co/400'
               }}
             />
           </div>
@@ -232,7 +249,7 @@ const BookDetail = () => {
                 <span>Loan period: 14 days</span>
               </div>
 
-              {book.available_copies > 0 ? (
+              {parseInt(book.available_copies || "0") > 0 ? (
                 <button
                   onClick={handleBorrow}
                   disabled={borrowing}
@@ -251,10 +268,23 @@ const BookDetail = () => {
                   )}
                 </button>
               ) : (
-                <div className="text-center py-4">
-                  <X className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                  <p className="text-gray-600">This book is currently unavailable</p>
-                </div>
+                <button
+                  onClick={handleReserve}
+                  disabled={reserving}
+                  className="btn-secondary w-full flex items-center justify-center"
+                >
+                  {reserving ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-800 mr-2"></div>
+                      Reserving...
+                    </>
+                  ) : (
+                    <>
+                      <Clock className="h-4 w-4 mr-2" />
+                      Reserve This Book
+                    </>
+                  )}
+                </button>
               )}
             </div>
           </div>

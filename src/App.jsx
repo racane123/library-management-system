@@ -7,6 +7,7 @@ import Dashboard from './components/Dashboard'
 import BookList from './components/BookList'
 import BookDetail from './components/BookDetail'
 import MyBooks from './components/MyBooks'
+import MyReservations from './components/MyReservations'
 import AdminPanel from './components/AdminPanel'
 import Navbar from './components/Navbar'
 import LoadingSpinner from './components/LoadingSpinner'
@@ -44,7 +45,8 @@ const AppLayout = () => {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/books" element={<BookList />} />
             <Route path="/books/:id" element={<BookDetail />} />
-            <Route path="/my-books" element={<MyBooks />} />
+            <Route path="/my-books" element={<ProtectedRoute><MyBooks /></ProtectedRoute>} />
+            <Route path="/my-reservations" element={<ProtectedRoute><MyReservations /></ProtectedRoute>} />
             <Route 
               path="/admin" 
               element={

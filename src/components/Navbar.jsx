@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useNotification } from '../contexts/NotificationContext'
 import { 
@@ -11,7 +11,8 @@ import {
   LogOut, 
   Menu, 
   X,
-  Library
+  Library,
+  Clock
 } from 'lucide-react'
 
 const Navbar = () => {
@@ -21,19 +22,29 @@ const Navbar = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const { showSuccess, showError } = useNotification()
 
-  const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'Browse Books', href: '/books', icon: Search },
-    { name: 'My Books', href: '/my-books', icon: User },
-  ]
-
-  // Add admin link if user is librarian or admin (support both user.role and user.data?.role)
   const userRole = user?.role || user?.data?.role;
 
-  //console.log(userRole)
-  if (userRole === 'librarian' || userRole === 'admin') {
-    navigation.push({ name: 'Admin Panel', href: '/admin', icon: Settings })
-  }
+  const getNavLinks = () => {
+    const baseLinks = [
+      { name: 'Dashboard', href: '/dashboard', icon: Home, roles: ['student', 'teacher', 'librarian', 'admin'] },
+      { name: 'Browse Books', href: '/books', icon: Search, roles: ['student', 'teacher', 'librarian', 'admin'] },
+    ];
+
+    if (user) {
+      baseLinks.push(
+        { name: 'My Books', href: '/my-books', icon: BookOpen, roles: ['student', 'teacher'] },
+        { name: 'My Reservations', href: '/my-reservations', icon: Clock, roles: ['student', 'teacher'] }
+      );
+    }
+    
+    if (userRole === 'librarian' || userRole === 'admin') {
+      baseLinks.push({ name: 'Admin Panel', href: '/admin', icon: Settings, roles: ['librarian', 'admin'] });
+    }
+
+    return baseLinks.filter(link => link.roles.includes(userRole));
+  };
+
+  const navigation = getNavLinks();
 
   const handleLogout = async () => {
     try {
@@ -63,21 +74,21 @@ const Navbar = () => {
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {navigation.map((item) => {
                 const Icon = item.icon
-                const isActive = location.pathname === item.href
-                
                 return (
-                  <Link
+                  <NavLink
                     key={item.name}
                     to={item.href}
-                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${
-                      isActive
-                        ? 'border-library-blue text-gray-900'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
+                    className={({ isActive }) =>
+                      `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${
+                        isActive
+                          ? 'border-library-blue text-gray-900'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`
+                    }
                   >
                     <Icon className="h-4 w-4 mr-1" />
                     {item.name}
-                  </Link>
+                  </NavLink>
                 )
               })}
             </div>
@@ -136,22 +147,22 @@ const Navbar = () => {
           <div className="pt-2 pb-3 space-y-1 border-t border-gray-200">
             {navigation.map((item) => {
               const Icon = item.icon
-              const isActive = location.pathname === item.href
-              
               return (
-                <Link
+                <NavLink
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center px-4 py-2 text-base font-medium transition-colors duration-200 ${
-                    isActive
-                      ? 'bg-library-blue text-white'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
+                  className={({ isActive }) =>
+                    `flex items-center px-4 py-2 text-base font-medium transition-colors duration-200 ${
+                      isActive
+                        ? 'bg-library-blue text-white'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`
+                  }
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Icon className="h-5 w-5 mr-3" />
                   {item.name}
-                </Link>
+                </NavLink>
               )
             })}
           </div>

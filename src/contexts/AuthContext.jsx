@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.login(username, password)
       const userData = response.data
       
-      setUser(userData.user)
+      setUser(userData.user) // Revert to correct user object
       return true
     } catch (error) {
       setError(error.message || 'Login failed')
