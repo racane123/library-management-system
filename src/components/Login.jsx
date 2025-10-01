@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useNotification } from '../contexts/NotificationContext'
 import { BookOpen, Lock, User, AlertCircle } from 'lucide-react'
+import aisatLogo from "../assets/AISAT-logo.png"
+import aisatLabel from "../assets/AISAT LABEL.png"
+import "./Component.css"
 
 const Login = () => {
   const [username, setUsername] = useState('')
@@ -33,8 +36,9 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-2 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-library-blue rounded-full flex items-center justify-center">
-            <BookOpen className="h-8 w-8 text-white" />
+          <div className="mx-auto flex items-center justify-center">
+            <img src={aisatLogo} alt="" className='AISAT-logo'/>
+            <img src={aisatLabel} alt="" className='AISAT-label'/>
           </div>
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
             School Library System

@@ -1,0 +1,13 @@
+
+.AISAT-logo{
+    height: 20dvh   ;
+}
+
+
+
+.AISAT-logo,
+.AISAT-label
+{
+    width: 20dvw;
+}
+

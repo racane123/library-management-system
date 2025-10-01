@@ -15,6 +15,8 @@ import {
   Clock
 } from 'lucide-react'
 
+import aisatLogo from "../assets/AISAT-logo.png"
+
 const Navbar = () => {
   const { user, logout } = useAuth()
   const location = useLocation()
@@ -63,8 +65,8 @@ const Navbar = () => {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link to="/dashboard" className="flex items-center">
-                <div className="h-8 w-8 bg-library-blue rounded-lg flex items-center justify-center">
-                  <Library className="h-5 w-5 text-white" />
+                <div className="h-12 w-12 rounded-lg flex items-center justify-center">
+                  <img src={aisatLogo} alt="logo" />
                 </div>
                 <span className="ml-2 text-xl font-bold text-gray-900">Library</span>
               </Link>
