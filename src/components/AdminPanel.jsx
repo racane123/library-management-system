@@ -3,7 +3,7 @@ import { libraryAPI } from '../services/api'
 import { 
   BookOpen, 
   Users, 
-  TrendingUp,
+  TrendingUp, 
   Calendar,
   AlertTriangle,
   CheckCircle

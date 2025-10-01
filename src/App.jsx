@@ -11,6 +11,7 @@ import MyReservations from './components/MyReservations'
 import AdminPanel from './components/AdminPanel'
 import Navbar from './components/Navbar'
 import LoadingSpinner from './components/LoadingSpinner'
+import NotFound from './components/NotFound'
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRoles = null }) => {
@@ -41,7 +42,7 @@ const AppLayout = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         <div className="min-h-[calc(100vh-4rem)]">
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/books" element={<BookList />} />
             <Route path="/books/:id" element={<BookDetail />} />
@@ -55,6 +56,7 @@ const AppLayout = () => {
                 </ProtectedRoute>
               } 
             />
+            <Route path='/404' element={<NotFound/>}/>
           </Routes>
         </div>
       </div>

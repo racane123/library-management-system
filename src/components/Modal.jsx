@@ -15,16 +15,16 @@ const Modal = ({ open, onClose, title, children }) => {
       >
         <div className="flex items-center justify-between p-4 border-b bg-gray-50 rounded-t-lg shrink-0">
           <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
-          <button
+        <button
             className="p-1 rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-library-blue"
-            onClick={onClose}
-            aria-label="Close modal"
-          >
+          onClick={onClose}
+          aria-label="Close modal"
+        >
             <X className="h-5 w-5" />
-          </button>
+        </button>
         </div>
         <div className="p-6 overflow-y-auto">
-          {children}
+        {children}
         </div>
       </div>
     </div>

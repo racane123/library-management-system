@@ -37,9 +37,9 @@ const Navbar = () => {
       );
     }
     
-    if (userRole === 'librarian' || userRole === 'admin') {
+  if (userRole === 'librarian' || userRole === 'admin') {
       baseLinks.push({ name: 'Admin Panel', href: '/admin', icon: Settings, roles: ['librarian', 'admin'] });
-    }
+  }
 
     return baseLinks.filter(link => link.roles.includes(userRole));
   };
@@ -80,9 +80,9 @@ const Navbar = () => {
                     to={item.href}
                     className={({ isActive }) =>
                       `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${
-                        isActive
-                          ? 'border-library-blue text-gray-900'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      isActive
+                        ? 'border-library-blue text-gray-900'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                       }`
                     }
                   >
@@ -153,9 +153,9 @@ const Navbar = () => {
                   to={item.href}
                   className={({ isActive }) =>
                     `flex items-center px-4 py-2 text-base font-medium transition-colors duration-200 ${
-                      isActive
-                        ? 'bg-library-blue text-white'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    isActive
+                      ? 'bg-library-blue text-white'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     }`
                   }
                   onClick={() => setIsMobileMenuOpen(false)}
